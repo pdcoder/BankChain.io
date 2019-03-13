@@ -18,7 +18,7 @@
  *
  */
 var HDWalletProvider = require("truffle-hdwallet-provider");
-const {MNEMONIC} = './secret/secret.js';
+const MNEMONIC = 'eagle husband betray circle this cliff hold stairs supreme wisdom error law';
 // const infuraKey = "fj4jll3k.....";
 //
 // const fs = require('fs');
