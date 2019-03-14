@@ -12,7 +12,6 @@ contract Bank{
        address  owner;
        mapping( address => uint256) balance;
     }
-    
     //Array of accounts
     Account[] public accounts;
     
@@ -46,7 +45,7 @@ contract Bank{
     }
     
 
-    function createAccount(string memory name) public  restricted
+    function createAccount(string memory name) public  restricted returns (bool status)
     {
         require(!customers[msg.sender] , "Already has an Account");
         Account memory newaccount = Account({
@@ -57,6 +56,7 @@ contract Bank{
         customerCount++;
         customers[msg.sender] = true;
         emit  EventLog(++counter , msg.sender,  "New Account created") ;
+        return customers[msg.sender];
     }
     
     function viewBalance(uint index) public restricted hasAccount view returns (uint256 balance)
@@ -66,9 +66,10 @@ contract Bank{
          
     }
     
-    function deposit(uint256 index) public hasAccount payable {
+    function deposit(uint256 index) public hasAccount payable returns (uint256 balance) {
         require(msg.value >= 0.01 ether, "Minimum 0.01 ether is to be deposited");
         accounts[index].balance[msg.sender] += msg.value;
+        return  accounts[index].balance[msg.sender];
     }
     
     function withdraw(uint256 amount, uint256 index) public hasAccount returns (uint256 remainingBalance)
