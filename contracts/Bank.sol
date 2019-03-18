@@ -59,7 +59,7 @@ contract Bank{
         return customers[msg.sender];
     }
     
-    function viewBalance(uint index) public restricted hasAccount view returns (uint256 balance)
+    function viewBalance(uint index) public restricted hasAccount returns (uint256 balance)
     {
          require(msg.sender==accounts[index].owner , "Account not found");
          return accounts[index].balance[msg.sender];

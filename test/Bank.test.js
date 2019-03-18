@@ -1,4 +1,5 @@
 var Bank = artifacts.require("./Bank.sol");
+const BigNumber = require('bignumber.js');
 
 contract('Bank', function(accounts){
     var instance;
@@ -14,52 +15,104 @@ contract('Bank', function(accounts){
 
       it("It should create an account", function() {
         return Bank.deployed().then(function(instance) {
-          return instance.createAccount("Prakash", {from : accounts[1]})
+          return instance.createAccount("PrakashDas", {from : accounts[1]})
         }).then(function(receipt) {
             assert.equal(receipt.logs.length, 1, "an event was triggered");
             assert.equal(receipt.logs[0].event, "EventLog", "the event type is correct");
         });
       });
 
+      it("It should create an account", function() {
+        return Bank.deployed().then(function(instance) {
+          return instance.createAccount("Prakash", {from : accounts[2]})
+        }).then(function(receipt) {
+            assert.equal(receipt.logs.length, 1, "an event was triggered");
+            assert.equal(receipt.logs[0].event, "EventLog", "the event type is correct");
+        });
+      });
+
+      it("It should create second account", function() {
+        return Bank.deployed().then(function(instance) {
+          return instance.createAccount("Prakash", {from : accounts[3]})
+        }).then(function(receipt) {
+            assert.equal(receipt.logs.length, 1, "an event was triggered");
+            assert.equal(receipt.logs[0].event, "EventLog", "the event type is correct");
+        });
+      });
+
+      it("It should create third account", function() {
+        return Bank.deployed().then(function(instance) {
+          return instance.createAccount("Akash", {from : accounts[4]})
+        }).then(function(receipt) {
+            assert.equal(receipt.logs.length, 1, "an event was triggered");
+            assert.equal(receipt.logs[0].event, "EventLog", "the event type is correct");
+        });
+      });
+
+
       it("It should not create an account", function() {
         return Bank.deployed().then(function(instance) {
           return instance.createAccount("Prakash", {from : accounts[0]})
         }).then(assert.fail).catch(function(error) {
-            assert(error.message.indexOf('cannot') >= 0, "error message must contain revert");
+            assert(error.message.indexOf('cannot') >= 0, "error message must contain cannot");
         });
       });
 
       it("It should view balance of account", function() {
         return Bank.deployed().then(function(instance) {
-          return instance.viewBalance(0,{from : accounts[1]})
-        }).then(function(balances) {
-          assert.equal(balances, 0);
+            instance = instance;
+          return instance.viewBalance.call(2 ,{from : accounts[3]})
+        }).then(function(balance) {
+          //console.log(balance.toNumber());
+          assert.equal(balance.toNumber(),0);
         });
       });
 
       it("It should deposit into account", function() {
         return Bank.deployed().then(function(instance) {
-          return instance.deposit(0,{ from : accounts[1], value : 10000000000000000})
-        }).then(function(receipts) {
-          assert.equal(receipts.receipt.status, true);
+          instance.deposit.sendTransaction(2,{ from : accounts[3], value : 3000000000000000000});
+          return instance.viewBalance.call(2 ,{from : accounts[3]})
+        }).then(function(balance) {
+          assert.equal(balance , 3000000000000000000);
+        });
+      });
+
+       it("It should return the number of accounts", function() {
+        return Bank.deployed().then(function(instance) {
+          return instance.customerCount.call({from: accounts[3]});
+        }).then(function(balances) {
+           // console.log(balances);
+          assert.isAtLeast(balances.toNumber() , 3,'There are more than 1 account');
         });
       });
 
       it("It should view balance of account after transaction", function() {
         return Bank.deployed().then(function(instance) {
-          return instance.viewBalance(0,{from : accounts[1]})
-        }).then(function(balances) {
-           // console.log(balances);
-          //assert.equal(balances, 0);
+          return instance.viewBalance.call(2,{from : accounts[3]})
+        }).then(function(balance) {
+          assert.equal(web3.utils.fromWei(balance,'ether'),3);
         });
       });
 
-      it("It should return the number of accounts", function() {
+      it("It should withdraw money", function() {
         return Bank.deployed().then(function(instance) {
-          return instance.customerCount({from: accounts[0]});
-        }).then(function(balances) {
-            console.log(balances);
-          assert.isAtLeast(balances, 1,'There are more than 1 account');
+           instance.withdraw(BigNumber(1000000000000000000),2,{from: accounts[3]});
+           return instance.viewBalance.call(2 ,{from : accounts[3]})
+          }).then(function(balance) {
+            assert.isBelow(parseInt(web3.utils.fromWei(balance,'ether')), 3);
+          });
+      });
+
+      it("It should transfer funds", function() {
+        return Bank.deployed().then(function(instance) {
+          instance.transferFunds.call(accounts[2],web3.utils.toWei('0.1','ether'),2,{from: accounts[3]});
+          return instance.viewBalance.call(2 ,{from : accounts[3]})
+        }).then(function(balance) {
+          assert.isBelow(parseInt(web3.utils.fromWei(balance,'ether')), 3);
         });
       });
+
+
+     
+
 });
