@@ -81,7 +81,6 @@ contract('Bank', function(accounts){
         return Bank.deployed().then(function(instance) {
           return instance.customerCount.call({from: accounts[3]});
         }).then(function(balances) {
-           // console.log(balances);
           assert.isAtLeast(balances.toNumber() , 3,'There are more than 1 account');
         });
       });
